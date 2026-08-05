@@ -1,0 +1,5 @@
+# External Python dependencies will be added here if required.
+
+boto3
+pytest
+moto[dynamodb]
