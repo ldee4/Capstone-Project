@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Registration &amp; Ticketing System</title>
+<style>
+  :root {
+    --ink: #1B2430;
+    --ink-soft: #5B6472;
+    --paper: #F7F8FA;
+    --card: #FFFFFF;
+    --line: #E2E5EA;
+    --accent: #2f396f;
+    --accent-soft: #E8F1EC;
+    --danger: #760000;
+    --danger-soft: #FBEAE5;
+    --mono: 'Times New Roman', 'Roboto', monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    background: var(--card);
+    padding: 28px 32px;
+    text-align: center;
+  }
+
+  header .eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 6px 0;
+  }
+
+  header h1 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  header p {
+    margin: 6px 0 0 0;
+    color: var(--ink-soft);
+    font-size: 14px;
+  }
+
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 720px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px;
+  }
+
+  .card.wide {
+    grid-column: 1 / -1;
+  }
+
+  .card h2 {
+    font-size: 15px;
+    margin: 0 0 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card h2 .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .card .sub {
+    color: var(--ink-soft);
+    font-size: 13px;
+    margin: 0 0 16px 0;
+  }
+
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    margin: 12px 0 5px 0;
+  }
+
+  label:first-of-type { margin-top: 0; }
+
+  input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+    background: var(--card);
+  }
+
+  button {
+    margin-top: 16px;
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  button:hover { opacity: 0.92; }
+  button:active { transform: translateY(1px); }
+
+  button.danger { background: var(--danger); }
+
+  .result {
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: none;
+  }
+
+  .result.show { display: block; }
+  .result.ok { border-color: var(--accent); background: var(--accent-soft); color: #1e4a34; }
+  .result.err { border-color: var(--danger); background: var(--danger-soft); color: #7a2c1a; }
+
+  #eventsList {
+    display: grid;
+    gap: 10px;
+  }
+
+  .event-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--paper);
+  }
+
+  .event-row .name {
+    font-weight: 600;
+    font-size: 14px;
+  }
+
+  .event-row .meta {
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .event-row .seats {
+    font-family: var(--mono);
+    font-size: 12.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .empty {
+    color: var(--ink-soft);
+    font-size: 13px;
+    font-style: italic;
+  }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    color: var(--ink-soft);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Event Registration &amp; Ticketing System</h1>
+  <p>An Event Registration & Ticketing System. The system helps you plan events, sell tickets, track attendees, and check people in. 
+    It makes the planning process fast and easy. 
+    It saves time for your team. It also gives your guests a smooth and simple  experience.</p>
+</header>
+
+<main>
+
+  <div class="card wide">
+    <h2>Upcoming Events </h2>
+    <p class="sub">These are list of events near you and ongoing which may interest you.</p>
+    <div id="eventsList"><p class="empty">Loading events…</p></div>
+  </div>
+
+  <div class="card">
+    <h2>Register</h2>
+    <p class="sub">Submit a new registration for an event.</p>
+    <label for="regName">Full name</label>
+    <input id="regName" type="text" placeholder="e.g. John Doe">
+    <label for="regEmail">Email</label>
+    <input id="regEmail" type="email" placeholder="e.g. akuboateng10@gmail.com">
+    <label for="regEventId">Event ID</label>
+    <input id="regEventId" type="text" placeholder="e.g. event-001">
+    <button onclick="registerAttendee()">Register</button>
+    <div class="result" id="regResult"></div>
+  </div>
+
+  <div class="card">
+    <h2>My Registrations</span></h2>
+    <p class="sub">Look up registrations by email address.</p>
+    <label for="lookupEmail">Email</label>
+    <input id="lookupEmail" type="email" placeholder="e.g. akuboateng10@gmail.com">
+    <button onclick="lookupRegistrations()">Look up</button>
+    <div class="result" id="lookupResult"></div>
+  </div>
+
+  <div class="card wide">
+    <h2>Cancel Registration</h2>
+    <p class="sub">Cancel using the registration ID returned at sign-up, or found via lookup above.</p>
+    <label for="cancelId">Registration ID</label>
+    <input id="cancelId" type="text" placeholder="e.g. 614706c4-737c-445a-a2bc-21aa7c4355aa">
+    <button class="danger" onclick="cancelRegistration()">Cancel Registration</button>
+    <div class="result" id="cancelResult"></div>
+  </div>
+
+</main>
+
+<footer>© 2026 ERICA GYAMFUAA FRDJOUR X VZSIFR.SO. ALL RIGHTS RESERVED.</footer>
+
+<script>
+  // Set this to your API Gateway Invoke URL (no trailing slash)
+  const API_BASE = "https://im4vupm359.execute-api.us-east-1.amazonaws.com/SystemDev";
+
+  function showResult(el, ok, data) {
+    el.className = "result show " + (ok ? "ok" : "err");
+    el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+  }
+
+  async function loadEvents() {
+    const list = document.getElementById("eventsList");
+    try {
+      const res = await fetch(`${API_BASE}/events`);
+      const data = await res.json();
+
+      if (!data.events || data.events.length === 0) {
+        list.innerHTML = '<p class="empty">No events found.</p>';
+        return;
+      }
+
+      list.innerHTML = data.events.map(ev => `
+        <div class="event-row">
+          <div>
+            <div class="name">${ev.name || ev.eventsId}</div>
+            <div class="meta">${ev.date || ""} ${ev.location ? "— " + ev.location : ""} &middot; ID: ${ev.eventsId}</div>
+          </div>
+          <div class="seats">${ev.availableSeats ?? "—"} seats left</div>
+        </div>
+      `).join("");
+    } catch (err) {
+      list.innerHTML = `<p class="empty">Could not load events: ${err.message}</p>`;
+    }
+  }
+
+  async function registerAttendee() {
+    const el = document.getElementById("regResult");
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const eventsId = document.getElementById("regEventId").value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, eventsId })
+      });
+      const data = await res.json();
+      showResult(el, res.ok, data);
+      if (res.ok) loadEvents();
+    } catch (err) {
+      showResult(el, false, { error: err.message });
+    }
+  }
+
+  async function lookupRegistrations() {
+    const el = document.getElementById("lookupResult");
+    const email = document.getElementById("lookupEmail").value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/registrations/${encodeURIComponent(email)}`);
+      const data = await res.json();
+      showResult(el, res.ok, data);
+    } catch (err) {
+      showResult(el, false, { error: err.message });
+    }
+  }
+
+  async function cancelRegistration() {
+    const el = document.getElementById("cancelResult");
+    const id = document.getElementById("cancelId").value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/registration/${encodeURIComponent(id)}`, {
+        method: "DELETE"
+      });
+      const data = await res.json();
+      showResult(el, res.ok, data);
+      if (res.ok) loadEvents();
+    } catch (err) {
+      showResult(el, false, { error: err.message });
+    }
+  }
+
+  loadEvents();
+</script>
+
+</body>
+</html>
