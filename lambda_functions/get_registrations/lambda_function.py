@@ -1,6 +1,7 @@
 import json
 import boto3
 from decimal import Decimal
+from urllib.parse import unquote
 from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource('dynamodb')
@@ -9,7 +10,8 @@ registrations_table = dynamodb.Table('Registrations')
 def lambda_handler(event, context):
     try:
         path_params = event.get('pathParameters') or {}
-        email = path_params.get('email')
+        raw_email = path_params.get('email')
+        email = unquote(raw_email) if raw_email else None
 
         if not email:
             return response(400, {'error': 'email is required'})
