@@ -11,11 +11,11 @@
     --paper: #F7F8FA;
     --card: #FFFFFF;
     --line: #E2E5EA;
-    --accent: #2f396f;
+    --accent: #11007b;
     --accent-soft: #E8F1EC;
-    --danger: #760000;
+    --danger: #d10101;
     --danger-soft: #FBEAE5;
-    --mono: 'Times New Roman', 'Roboto', monospace;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
   }
 
   * { box-sizing: border-box; }
@@ -151,20 +151,64 @@
 
   .result {
     margin-top: 14px;
-    font-family: var(--mono);
-    font-size: 12.5px;
+    font-size: 13.5px;
     background: var(--paper);
     border: 1px solid var(--line);
     border-radius: 6px;
-    padding: 10px 12px;
-    white-space: pre-wrap;
+    padding: 12px 14px;
     word-break: break-word;
     display: none;
+    line-height: 1.55;
   }
 
   .result.show { display: block; }
   .result.ok { border-color: var(--accent); background: var(--accent-soft); color: #1e4a34; }
   .result.err { border-color: var(--danger); background: var(--danger-soft); color: #7a2c1a; }
+
+  .result strong { font-weight: 700; }
+
+  .result .rid {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    background: rgba(0,0,0,0.05);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .reg-card {
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 6px;
+    padding: 10px 12px;
+    background: rgba(255,255,255,0.5);
+    margin-top: 8px;
+  }
+
+  .reg-card:first-child { margin-top: 0; }
+
+  .reg-card .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 2px 0;
+  }
+
+  .reg-card .row span:first-child {
+    color: var(--ink-soft);
+  }
+
+  .status-pill {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 1px 8px;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  .status-pill.confirmed { background: var(--accent-soft); color: var(--accent); }
+  .status-pill.cancelled { background: var(--danger-soft); color: var(--danger); }
 
   #eventsList {
     display: grid;
@@ -221,16 +265,16 @@
 
 <header>
   <h1>Event Registration &amp; Ticketing System</h1>
-  <p>An Event Registration & Ticketing System. The system helps you plan events, sell tickets, track attendees, and check people in. 
-    It makes the planning process fast and easy. 
-    It saves time for your team. It also gives your guests a smooth and simple  experience.</p>
+  <p>An Event Registration & Ticketing System. The system helps you plan events, sell tickets, track attendees, 
+    and check people in. It makes the planning process fast and easy. It saves time for your team. 
+    It also gives your guests a smooth and simple experience.</p>
 </header>
 
 <main>
 
   <div class="card wide">
     <h2>Upcoming Events </h2>
-    <p class="sub">These are list of events near you and ongoing which may interest you.</p>
+    <p class="sub">Live list pulled directly from DynamoDB via API Gateway.</p>
     <div id="eventsList"><p class="empty">Loading events…</p></div>
   </div>
 
@@ -238,9 +282,9 @@
     <h2>Register</h2>
     <p class="sub">Submit a new registration for an event.</p>
     <label for="regName">Full name</label>
-    <input id="regName" type="text" placeholder="e.g. John Doe">
+    <input id="regName" type="text" placeholder="e.g. Erica Fordjour">
     <label for="regEmail">Email</label>
-    <input id="regEmail" type="email" placeholder="e.g. akuboateng10@gmail.com">
+    <input id="regEmail" type="email" placeholder="e.g. erica@gmail.com">
     <label for="regEventId">Event ID</label>
     <input id="regEventId" type="text" placeholder="e.g. event-001">
     <button onclick="registerAttendee()">Register</button>
@@ -248,10 +292,10 @@
   </div>
 
   <div class="card">
-    <h2>My Registrations</span></h2>
+    <h2>My Registrations</h2>
     <p class="sub">Look up registrations by email address.</p>
     <label for="lookupEmail">Email</label>
-    <input id="lookupEmail" type="email" placeholder="e.g. akuboateng10@gmail.com">
+    <input id="lookupEmail" type="email" placeholder="e.g. erica@gmail.com">
     <button onclick="lookupRegistrations()">Look up</button>
     <div class="result" id="lookupResult"></div>
   </div>
@@ -273,9 +317,31 @@
   // Set this to your API Gateway Invoke URL (no trailing slash)
   const API_BASE = "https://im4vupm359.execute-api.us-east-1.amazonaws.com/SystemDev";
 
-  function showResult(el, ok, data) {
+  function showResult(el, ok, html) {
     el.className = "result show " + (ok ? "ok" : "err");
-    el.textContent = typeof data === "string" ? data : JSON.stringify(data, null, 2);
+    el.innerHTML = html;
+  }
+
+  function formatDate(iso) {
+    if (!iso) return "";
+    try {
+      return new Date(iso).toLocaleString(undefined, {
+        dateStyle: "medium", timeStyle: "short"
+      });
+    } catch { return iso; }
+  }
+
+  function renderRegistrationCard(reg) {
+    const pillClass = (reg.status || "").toLowerCase() === "cancelled" ? "cancelled" : "confirmed";
+    return `
+      <div class="reg-card">
+        <div class="row"><span>Event</span><span><strong>${reg.eventsId || "—"}</strong></span></div>
+        <div class="row"><span>Name</span><span>${reg.name || "—"}</span></div>
+        <div class="row"><span>Status</span><span class="status-pill ${pillClass}">${reg.status || "unknown"}</span></div>
+        <div class="row"><span>Registered</span><span>${formatDate(reg.registeredAt)}</span></div>
+        <div class="row"><span>Registration ID</span><span class="rid">${reg.registrationsId || "—"}</span></div>
+      </div>
+    `;
   }
 
   async function loadEvents() {
@@ -316,10 +382,19 @@
         body: JSON.stringify({ name, email, eventsId })
       });
       const data = await res.json();
-      showResult(el, res.ok, data);
-      if (res.ok) loadEvents();
+
+      if (res.ok) {
+        showResult(el, true, `
+          <strong>You're registered!</strong> A confirmation has been recorded for <strong>${name || "you"}</strong>.
+          <div class="rid">Registration ID: ${data.registrationId}</div>
+          <div style="margin-top:6px; font-size:12px; color:var(--ink-soft);">Save this ID — you'll need it to cancel later.</div>
+        `);
+        loadEvents();
+      } else {
+        showResult(el, false, `<strong>Couldn't register.</strong> ${data.error || "Please check the details and try again."}`);
+      }
     } catch (err) {
-      showResult(el, false, { error: err.message });
+      showResult(el, false, `<strong>Something went wrong.</strong> ${err.message}`);
     }
   }
 
@@ -330,9 +405,17 @@
     try {
       const res = await fetch(`${API_BASE}/registrations/${encodeURIComponent(email)}`);
       const data = await res.json();
-      showResult(el, res.ok, data);
+
+      if (!res.ok) {
+        showResult(el, false, `<strong>Couldn't look that up.</strong> ${data.error || "Please try again."}`);
+      } else if (data.count === 0) {
+        showResult(el, true, `No registrations found for <strong>${email}</strong>.`);
+      } else {
+        const cards = data.registrations.map(renderRegistrationCard).join("");
+        showResult(el, true, `<strong>${data.count} registration${data.count > 1 ? "s" : ""} found</strong>${cards}`);
+      }
     } catch (err) {
-      showResult(el, false, { error: err.message });
+      showResult(el, false, `<strong>Something went wrong.</strong> ${err.message}`);
     }
   }
 
@@ -345,10 +428,15 @@
         method: "DELETE"
       });
       const data = await res.json();
-      showResult(el, res.ok, data);
-      if (res.ok) loadEvents();
+
+      if (res.ok) {
+        showResult(el, true, `<strong>Registration cancelled.</strong> The seat has been returned to the event.`);
+        loadEvents();
+      } else {
+        showResult(el, false, `<strong>Couldn't cancel.</strong> ${data.error || "Please check the registration ID and try again."}`);
+      }
     } catch (err) {
-      showResult(el, false, { error: err.message });
+      showResult(el, false, `<strong>Something went wrong.</strong> ${err.message}`);
     }
   }
 
