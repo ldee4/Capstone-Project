@@ -1,12 +1,15 @@
 import json
 import boto3
 import uuid
+import re
 from decimal import Decimal
 from datetime import datetime, timezone
 
 dynamodb = boto3.resource('dynamodb')
 events_table = dynamodb.Table('Events')
 registrations_table = dynamodb.Table('Registrations')
+
+EMAIL_PATTERN = re.compile(r'^[^@\s]+@[^@\s]+\.[^@\s]+$')
 
 def lambda_handler(event, context):
     try:
@@ -18,6 +21,9 @@ def lambda_handler(event, context):
 
         if not name or not email or not event_id:
             return response(400, {'error': 'name, email, and eventsId are required'})
+
+        if not EMAIL_PATTERN.match(email):
+            return response(400, {'error': 'Please provide a valid email address'})
 
         event_result = events_table.get_item(Key={'eventsId': event_id})
         if 'Item' not in event_result:
