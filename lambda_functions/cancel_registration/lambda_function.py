@@ -1,10 +1,13 @@
 import json
 import boto3
+import time
 from decimal import Decimal
 
 dynamodb = boto3.resource('dynamodb')
 registrations_table = dynamodb.Table('Registrations')
 events_table = dynamodb.Table('Events')
+
+CANCELLED_RECORD_LIFESPAN_SECONDS = 30 * 24 * 60 * 60  # 30 days
 
 def lambda_handler(event, context):
     try:
@@ -20,11 +23,16 @@ def lambda_handler(event, context):
 
         registration = result['Item']
 
+        expires_at = int(time.time()) + CANCELLED_RECORD_LIFESPAN_SECONDS
+
         registrations_table.update_item(
             Key={'registrationsId': registration_id},
-            UpdateExpression='SET #s = :cancelled',
+            UpdateExpression='SET #s = :cancelled, expiresAt = :expires',
             ExpressionAttributeNames={'#s': 'status'},
-            ExpressionAttributeValues={':cancelled': 'cancelled'}
+            ExpressionAttributeValues={
+                ':cancelled': 'cancelled',
+                ':expires': expires_at
+            }
         )
 
         events_table.update_item(
