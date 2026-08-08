@@ -153,6 +153,14 @@ event-registration-ticketing-system/
 
 ---
 
+
+## Infrastructure as Code
+
+The `infrastructure/` folder contains a Terraform configuration that codifies this project's AWS resources — DynamoDB tables, IAM roles/policies, Lambda functions, API Gateway routes, CloudWatch alarms, and the SNS topic — as an alternative to the manual console setup described above.
+
+**Note:** This configuration mirrors the live, manually-built infrastructure but has not been applied against AWS. It's included as documentation of the full architecture and a foundation for infrastructure automation, rather than as a tested deployment path. Review it carefully (`terraform plan`) before running `terraform apply`, ideally against a separate AWS account to avoid conflicting with existing resources of the same name.
+
+
 ## Testing
 
 Run tests locally:
