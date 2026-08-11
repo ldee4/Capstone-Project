@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Event Registration & Ticketing System
 
 A serverless REST API built on AWS that replaces manual event registration processes (e.g. Microsoft Forms + Excel) with a scalable, automated, cloud-native solution.
@@ -201,3 +202,6 @@ A few real issues encountered and resolved during development, useful context fo
 - Email addresses arrived URL-encoded (`%40` instead of `@`) in path parameters — solved with `urllib.parse.unquote`.
 - GitHub's OIDC subject claim format changed to include immutable owner/repo IDs for newer repositories — trust policy updated accordingly.
 - Repository-level "Workflow permissions" setting silently capped the `id-token: write` permission needed for OIDC, despite it being correctly declared in the workflow file.
+=======
+# Capstone-Project
+>>>>>>> 7295d1eeead32e3817867a11e43f0c4e40c8b307
