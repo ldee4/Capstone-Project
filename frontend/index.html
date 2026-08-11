@@ -4,185 +4,263 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Registration &amp; Ticketing System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #1B2430;
-    --ink-soft: #5B6472;
-    --paper: #F7F8FA;
-    --card: #FFFFFF;
-    --line: #E2E5EA;
-    --accent: #11007b;
-    --accent-soft: #E8F1EC;
-    --danger: #d10101;
-    --danger-soft: #FBEAE5;
-    --mono: 'JetBrains Mono', 'Courier New', monospace;
+    --bg: #201C2C;
+    --panel: #2B2638;
+    --panel-deep: #1A1622;
+    --line: #443E54;
+    --ink: #F1EDF5;
+    --ink-soft: #A79FBB;
+    --accent: #F2B705;
+    --accent-ink: #3A2C00;
+    --coral: #FF6B4A;
+    --coral-soft: rgba(255,107,74,0.14);
+    --accent-soft: rgba(242,183,5,0.14);
+    --display: 'Oswald', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
   }
 
   * { box-sizing: border-box; }
 
   body {
     margin: 0;
-    background: var(--paper);
+    background:
+      radial-gradient(circle at 15% 10%, rgba(242,183,5,0.07), transparent 45%),
+      radial-gradient(circle at 85% 90%, rgba(255,107,74,0.06), transparent 40%),
+      var(--bg);
     color: var(--ink);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-family: var(--body);
     line-height: 1.5;
+    min-height: 100vh;
   }
 
+  /* ===== HEADER: the master ticket ===== */
   header {
-    border-bottom: 1px solid var(--line);
-    background: var(--card);
-    padding: 28px 32px;
+    position: relative;
+    background: var(--panel-deep);
+    border-bottom: 3px dashed rgba(234,243,241,0.18);
+    padding: 40px 32px 34px;
     text-align: center;
+    overflow: hidden;
   }
 
-  header .eyebrow {
+  header::before, header::after {
+    content: "";
+    position: absolute;
+    bottom: -18px;
+    width: 36px;
+    height: 36px;
+    background: var(--bg);
+    border-radius: 50%;
+  }
+  header::before { left: -18px; }
+  header::after { right: -18px; }
+
+  .eyebrow {
     font-family: var(--mono);
     font-size: 12px;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--accent);
-    margin: 0 0 6px 0;
+    margin: 0 0 10px 0;
   }
+
+  .eyebrow::before, .eyebrow::after { content: "— "; }
+  .eyebrow::after { content: " —"; }
 
   header h1 {
     margin: 0;
-    font-size: 26px;
+    font-family: var(--display);
     font-weight: 700;
-    letter-spacing: -0.01em;
+    font-size: clamp(28px, 4vw, 44px);
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--ink);
   }
 
   header p {
-    margin: 6px 0 0 0;
+    margin: 12px auto 0;
     color: var(--ink-soft);
     font-size: 14px;
+    max-width: 560px;
   }
 
   main {
-    max-width: 960px;
+    max-width: 980px;
     margin: 0 auto;
-    padding: 32px;
+    padding: 40px 24px 24px;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 24px;
+    gap: 28px;
   }
 
   @media (max-width: 720px) {
-    main { grid-template-columns: 1fr; }
+    main { grid-template-columns: 1fr; padding: 32px 16px 16px; }
   }
 
+  /* ===== TICKET STUB CARD ===== */
   .card {
-    background: var(--card);
+    position: relative;
+    background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 22px;
+    border-radius: 14px;
+    padding: 26px 26px 24px;
   }
 
-  .card.wide {
-    grid-column: 1 / -1;
+  .card.wide { grid-column: 1 / -1; }
+
+  /* perforation notches + dashed tear-line, only on cards that carry a stub-tag */
+  .card.stub {
+    padding-bottom: 30px;
   }
 
-  .card h2 {
-    font-size: 15px;
-    margin: 0 0 4px 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .card.stub::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    top: 76px;
+    height: 0;
+    border-top: 2px dashed rgba(234,243,241,0.16);
   }
 
-  .card h2 .tag {
+  .card.stub::after {
+    content: "";
+    position: absolute;
+    top: 66px;
+    left: -11px; right: -11px;
+    height: 22px;
+    background:
+      radial-gradient(circle 11px at 0 11px, var(--bg) 99%, transparent 100%),
+      radial-gradient(circle 11px at 100% 11px, var(--bg) 99%, transparent 100%);
+  }
+
+  .stub-tag {
+    display: inline-block;
     font-family: var(--mono);
-    font-size: 11px;
-    padding: 2px 7px;
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 9px;
     border-radius: 4px;
     background: var(--accent-soft);
     color: var(--accent);
     font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .stub-tag.danger { background: var(--coral-soft); color: var(--coral); }
+
+  .card h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 18px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0 0 4px 0;
+    color: var(--ink);
   }
 
   .card .sub {
     color: var(--ink-soft);
     font-size: 13px;
-    margin: 0 0 16px 0;
+    margin: 0 0 18px 0;
   }
+
+  .card.stub .sub { margin-bottom: 26px; }
 
   label {
     display: block;
-    font-size: 12px;
-    font-weight: 600;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 500;
     color: var(--ink-soft);
-    margin: 12px 0 5px 0;
+    margin: 14px 0 6px 0;
   }
 
   label:first-of-type { margin-top: 0; }
 
   input {
     width: 100%;
-    padding: 9px 11px;
+    padding: 10px 12px;
     border: 1px solid var(--line);
-    border-radius: 6px;
+    border-radius: 7px;
     font-size: 14px;
-    background: var(--paper);
+    font-family: var(--body);
+    background: var(--panel-deep);
     color: var(--ink);
   }
+
+  input::placeholder { color: rgba(156,192,184,0.45); }
 
   input:focus {
     outline: 2px solid var(--accent);
     outline-offset: 1px;
-    background: var(--card);
   }
 
   button {
-    margin-top: 16px;
+    margin-top: 18px;
     width: 100%;
-    padding: 10px;
+    padding: 11px;
     border: none;
-    border-radius: 6px;
+    border-radius: 7px;
     background: var(--accent);
-    color: white;
+    color: var(--accent-ink);
+    font-family: var(--display);
     font-size: 14px;
     font-weight: 600;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
     cursor: pointer;
+    transition: transform 0.08s ease, opacity 0.15s ease;
   }
 
   button:hover { opacity: 0.92; }
   button:active { transform: translateY(1px); }
+  button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
-  button.danger { background: var(--danger); }
+  button.danger { background: var(--coral); color: #2A0E06; }
 
   .result {
-    margin-top: 14px;
+    margin-top: 16px;
     font-size: 13.5px;
-    background: var(--paper);
+    background: var(--panel-deep);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 12px 14px;
+    border-radius: 8px;
+    padding: 13px 15px;
     word-break: break-word;
     display: none;
     line-height: 1.55;
   }
 
   .result.show { display: block; }
-  .result.ok { border-color: var(--accent); background: var(--accent-soft); color: #1e4a34; }
-  .result.err { border-color: var(--danger); background: var(--danger-soft); color: #7a2c1a; }
+  .result.ok { border-color: var(--accent); background: var(--accent-soft); color: var(--ink); }
+  .result.err { border-color: var(--coral); background: var(--coral-soft); color: var(--ink); }
 
   .result strong { font-weight: 700; }
 
   .result .rid {
     display: inline-block;
-    margin-top: 6px;
+    margin-top: 7px;
     font-family: var(--mono);
     font-size: 11.5px;
-    background: rgba(0,0,0,0.05);
-    padding: 2px 6px;
+    background: rgba(0,0,0,0.22);
+    padding: 3px 7px;
     border-radius: 4px;
+    letter-spacing: 0.02em;
   }
 
   .reg-card {
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 6px;
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.5);
-    margin-top: 8px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 11px 13px;
+    background: rgba(0,0,0,0.14);
+    margin-top: 9px;
   }
 
   .reg-card:first-child { margin-top: 0; }
@@ -190,56 +268,67 @@
   .reg-card .row {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
     font-size: 13px;
-    padding: 2px 0;
+    padding: 3px 0;
   }
 
   .reg-card .row span:first-child {
     color: var(--ink-soft);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   .status-pill {
     font-family: var(--mono);
     font-size: 11px;
-    padding: 1px 8px;
+    padding: 2px 9px;
     border-radius: 20px;
     font-weight: 600;
     text-transform: capitalize;
   }
 
   .status-pill.confirmed { background: var(--accent-soft); color: var(--accent); }
-  .status-pill.cancelled { background: var(--danger-soft); color: var(--danger); }
+  .status-pill.cancelled { background: var(--coral-soft); color: var(--coral); }
 
   #eventsList {
     display: grid;
-    gap: 10px;
+    gap: 12px;
   }
 
   .event-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 12px 14px;
+    gap: 12px;
+    padding: 14px 16px;
     border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
     border-radius: 8px;
-    background: var(--paper);
+    background: var(--panel-deep);
   }
 
   .event-row .name {
+    font-family: var(--display);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
   }
 
   .event-row .meta {
     font-size: 12.5px;
     color: var(--ink-soft);
-    margin-top: 2px;
+    margin-top: 3px;
+    font-family: var(--mono);
   }
 
   .event-row .seats {
     font-family: var(--mono);
-    font-size: 12.5px;
-    padding: 3px 9px;
+    font-size: 12px;
+    padding: 4px 10px;
     border-radius: 20px;
     background: var(--accent-soft);
     color: var(--accent);
@@ -255,30 +344,32 @@
 
   footer {
     text-align: center;
-    padding: 24px;
+    padding: 30px 24px 36px;
     color: var(--ink-soft);
-    font-size: 12px;
+    font-size: 11.5px;
+    font-family: var(--mono);
+    letter-spacing: 0.03em;
   }
 </style>
 </head>
 <body>
 
 <header>
+  <p class="eyebrow">Admit One</p>
   <h1>Event Registration &amp; Ticketing System</h1>
-  <p>An Event Registration & Ticketing System. The system helps you plan events, sell tickets, track attendees, 
-    and check people in. It makes the planning process fast and easy. It saves time for your team. 
-    It also gives your guests a smooth and simple experience.</p>
+  <p>Plan events, issue tickets, track attendees, and check people in — all in one place, built for speed on both sides of the door.</p>
 </header>
 
 <main>
 
   <div class="card wide">
-    <h2>Upcoming Events </h2>
+    <h2>Upcoming Events</h2>
     <p class="sub">Live list pulled directly from DynamoDB via API Gateway.</p>
     <div id="eventsList"><p class="empty">Loading events…</p></div>
   </div>
 
-  <div class="card">
+  <div class="card stub">
+    <span class="stub-tag">Step 1</span>
     <h2>Register</h2>
     <p class="sub">Submit a new registration for an event.</p>
     <label for="regName">Full name</label>
@@ -287,20 +378,22 @@
     <input id="regEmail" type="email" placeholder="e.g. erica@gmail.com">
     <label for="regEventId">Event ID</label>
     <input id="regEventId" type="text" placeholder="e.g. event-001">
-    <button onclick="registerAttendee()">Register</button>
+    <button onclick="registerAttendee()">Get Ticket</button>
     <div class="result" id="regResult"></div>
   </div>
 
-  <div class="card">
+  <div class="card stub">
+    <span class="stub-tag">Lookup</span>
     <h2>My Registrations</h2>
     <p class="sub">Look up registrations by email address.</p>
     <label for="lookupEmail">Email</label>
     <input id="lookupEmail" type="email" placeholder="e.g. erica@gmail.com">
-    <button onclick="lookupRegistrations()">Look up</button>
+    <button onclick="lookupRegistrations()">Find My Tickets</button>
     <div class="result" id="lookupResult"></div>
   </div>
 
-  <div class="card wide">
+  <div class="card wide stub">
+    <span class="stub-tag danger">Change of plans</span>
     <h2>Cancel Registration</h2>
     <p class="sub">Cancel using the registration ID returned at sign-up, or found via lookup above.</p>
     <label for="cancelId">Registration ID</label>
@@ -311,11 +404,11 @@
 
 </main>
 
-<footer>© 2026 ERICA GYAMFUAA FRDJOUR X VZSIFR.SO. ALL RIGHTS RESERVED.</footer>
+<footer>© 2026 EVENT REGISTRATION &amp; TICKETING SYSTEM · ALL RIGHTS RESERVED</footer>
 
 <script>
   // Set this to your API Gateway Invoke URL (no trailing slash)
-  const API_BASE = "https://im4vupm359.execute-api.us-east-1.amazonaws.com/SystemDev";
+  const API_BASE = "https://zrfqtk0oyb.execute-api.us-east-1.amazonaws.com/SystemDev";
 
   function showResult(el, ok, html) {
     el.className = "result show " + (ok ? "ok" : "err");
