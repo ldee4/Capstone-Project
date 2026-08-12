@@ -48,22 +48,23 @@ jobs:
         run: |
           cd lambda_functions/register
           zip -r function.zip lambda_function.py
-          aws lambda update-function-code --function-name EventRegAndTicketing-Register --zip-file fileb://function.zip
+          aws lambda update-function-code --function-name EventTicketing-Register --zip-file fileb://function.zip
 
       - name: Deploy ListEvents function
         run: |
           cd lambda_functions/list_events
           zip -r function.zip lambda_function.py
-          aws lambda update-function-code --function-name EventRegAndTicketing-ListEvents --zip-file fileb://function.zip
+          aws lambda update-function-code --function-name EventTicketing-ListEvents --zip-file fileb://function.zip
 
       - name: Deploy GetRegistrations function
         run: |
           cd lambda_functions/get_registrations
           zip -r function.zip lambda_function.py
-          aws lambda update-function-code --function-name EventRegAndTicketing-GetRegistrations --zip-file fileb://function.zip
+          aws lambda update-function-code --function-name EventTicketing-GetRegistrations --zip-file fileb://function.zip
 
       - name: Deploy CancelRegistration function
         run: |
           cd lambda_functions/cancel_registration
           zip -r function.zip lambda_function.py
+          aws lambda update-function-code --function-name EventTicketing-CancelRegistration --zip-file fileb://function.zip
           aws lambda update-function-code --function-name EventRegAndTicketing-CancelRegistration --zip-file fileb://function.zip
